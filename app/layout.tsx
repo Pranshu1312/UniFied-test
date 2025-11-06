@@ -4,7 +4,6 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { SidebarProvider } from "@/components/sidebar-provider";
-import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "@/components/auth-provider";
 import ClientLayoutWrapper from "./layout-wrapper"; // ✅ Client wrapper
 
@@ -29,8 +28,10 @@ export default function RootLayout({
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <AuthProvider>
             <SidebarProvider>
-              <ClientLayoutWrapper>{children}</ClientLayoutWrapper>
-              <Toaster />
+              {/* ✅ ALL CLIENT STUFF INSIDE HERE */}
+              <ClientLayoutWrapper>
+                {children}
+              </ClientLayoutWrapper>
             </SidebarProvider>
           </AuthProvider>
         </ThemeProvider>

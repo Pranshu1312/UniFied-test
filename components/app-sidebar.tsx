@@ -16,6 +16,7 @@ import {
   TrendingUpIcon as Trending,
   User,
   Users,
+  QrCode, // ✅ Added QR icon
 } from "lucide-react"
 import { motion } from "framer-motion"
 
@@ -66,10 +67,12 @@ export function AppSidebar() {
     { title: "Community", href: "/community", icon: MessageSquare },
   ]
 
+  // ✅ Added Check-In page to admin nav
   const adminNavItems = [
     { title: "Dashboard", href: "/admin", icon: LayoutDashboard },
     { title: "Manage Events", href: "/admin/events", icon: Calendar },
     { title: "Users", href: "/admin/users", icon: Users },
+    { title: "Check-In", href: "/admin/checkin", icon: QrCode }, // ✅ New Add
     { title: "Settings", href: "/admin/settings", icon: Settings },
   ]
 
