@@ -10,7 +10,7 @@ import ClientLayoutWrapper from "./layout-wrapper"; // ✅ Client wrapper
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Event Sphere by ps",
+  title: "UniFied - Event Manager",
   description: "Discover and book the best events across India",
   icons: { icon: "/favicon.ico" },
 };
