@@ -66,11 +66,12 @@ export default function ManageEventsPage() {
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {events.map((event) => (
           <Card key={event.id} className="overflow-hidden">
-            <img
-              src={event.image || "/placeholder.svg"}
-              alt={event.title}
-              className="h-44 w-full object-cover"
-            />
+<img
+  src={event.banner_url || "/placeholder.svg"}
+  alt={event.title}
+  className="h-48 w-full object-cover"
+  onError={(e) => (e.currentTarget.src = "/placeholder.svg")}
+/>
 
             <CardHeader>
               <CardTitle className="line-clamp-1">{event.title}</CardTitle>
