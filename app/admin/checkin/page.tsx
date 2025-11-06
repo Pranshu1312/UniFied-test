@@ -11,95 +11,87 @@ import { toast } from "@/components/ui/use-toast";
 
 export default function AdminCheckInPage() {
   const { role } = useAuth();
-  const [ticketId, setTicketId] = useState<string>("");
+  const [ticketId, setTicketId] = useState("");
 
   if (role !== "admin") {
     return <p className="p-6 text-red-600 font-semibold">Access Denied</p>;
   }
 
-  const handleCheckIn = async (id: string) => {
+  const checkInTicket = async (id: string) => {
     if (!id) return;
 
-    console.log("✅ Scanning ticket id:", id);
+    console.log("🎯 Checking ticket:", id);
 
-    // Fetch ticket
-    const { data: ticket, error: getError } = await supabase
+    const { data: ticket, error: fetchError } = await supabase
       .from("tickets")
       .select("*")
       .eq("id", id)
       .maybeSingle();
 
-    if (getError || !ticket) {
-      console.error("❌ Ticket not found:", getError);
+    if (fetchError || !ticket) {
       toast({
         title: "❌ Invalid Ticket",
-        description: "Ticket not found in system.",
+        description: "Ticket not found in database.",
         variant: "destructive",
       });
+      console.error(fetchError);
       return;
     }
 
-    // Already checked in?
     if (ticket.checked_in) {
       toast({
         title: "⚠️ Already Checked-In",
-        description: `Scanned earlier at ${new Date(ticket.checked_in_at).toLocaleString()}`,
+        description: `Checked in at ${new Date(ticket.checked_in_at).toLocaleString()}`,
       });
       return;
     }
 
-    // ✅ Update ticket
-    const { error } = await supabase
+    const { error: updateError } = await supabase
       .from("tickets")
       .update({
         checked_in: true,
         checked_in_at: new Date().toISOString(),
       })
-      .eq("id", id)
-      .eq("event_id", ticket.event_id)
-      .eq("user_id", ticket.user_id);
+      .eq("id", id);
 
-    if (error) {
-      console.error("❌ Check-in update error:", error);
+    if (updateError) {
       toast({
-        title: "Error",
-        description: error.message,
+        title: "❌ Error updating ticket",
+        description: updateError.message,
         variant: "destructive",
       });
+      console.error(updateError);
       return;
     }
 
-    // Audio success
     try {
-      new Audio("/success.mp3").play();
-    } catch (e) {}
+      new Audio("/success.mp3").play(); // ✅ Play success sound
+    } catch {}
 
     toast({
       title: "✅ Check-In Successful",
-      description: `Ticket ${id} marked as checked-in.`,
+      description: `Ticket ${id} has been checked in.`,
     });
   };
 
-  // ✅ Handle QR Scan
-  const handleQRScan = (text: string) => {
-    if (!text) return;
+  const handleQRScan = (raw: string) => {
+    if (!raw) return;
+    console.log("📥 QR Raw:", raw);
 
-    console.log("📩 Raw QR text:", text);
+    // ✅ Format: ticket=XXX|event=YYY|user=ZZZ
+    const match = raw.match(/ticket=([^|]+)/);
+    const id = match?.[1];
 
-    // Your QR format:  ticket=XXX|event=YYY|user=ZZZ
-    const match = text.match(/ticket=([^|]+)/);
-    const ticketId = match?.[1];
-
-    if (!ticketId) {
+    if (!id) {
       toast({
-        title: "⚠️ Invalid QR",
-        description: "QR code format not recognized.",
+        title: "❌ Invalid QR",
+        description: "QR format not recognized.",
         variant: "destructive",
       });
       return;
     }
 
-    handleCheckIn(ticketId);
+    checkInTicket(id);
   };
 
   return (
@@ -127,7 +119,7 @@ export default function AdminCheckInPage() {
             value={ticketId}
             onChange={(e) => setTicketId(e.target.value)}
           />
-          <Button onClick={() => handleCheckIn(ticketId)}>Check-In</Button>
+          <Button onClick={() => checkInTicket(ticketId)}>Check-In</Button>
         </CardContent>
       </Card>
     </div>
