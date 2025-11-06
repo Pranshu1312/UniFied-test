@@ -15,7 +15,6 @@ import {
   Ticket,
   TrendingUpIcon as Trending,
   User,
-  Users,
   QrCode, // ✅ Added QR icon
 } from "lucide-react"
 import { motion } from "framer-motion"
@@ -71,7 +70,6 @@ export function AppSidebar() {
   const adminNavItems = [
     { title: "Dashboard", href: "/admin", icon: LayoutDashboard },
     { title: "Manage Events", href: "/admin/events", icon: Calendar },
-    { title: "Users", href: "/admin/users", icon: Users },
     { title: "Check-In", href: "/admin/checkin", icon: QrCode }, // ✅ New Add
     { title: "Settings", href: "/admin/settings", icon: Settings },
   ]
@@ -93,7 +91,7 @@ export function AppSidebar() {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.3 }}
           >
-            EventSphere
+            Uni-Fied
           </motion.span>
         </Link>
         <SidebarTrigger className="mr-2" />

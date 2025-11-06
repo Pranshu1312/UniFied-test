@@ -28,7 +28,7 @@ export default function ClientLayoutWrapper({
       {/* Footer */}
       {!isAuthPage && (
         <footer className="w-full border-t bg-background py-6 text-center text-sm text-muted-foreground">
-          © {new Date().getFullYear()} EventSphere by Param Soni — paramsoni.me@gmail.com
+          © {new Date().getFullYear()} Uni-Fied by Pranshu Mangale, Param Soni, Twisha Patel
         </footer>
       )}
     </div>
