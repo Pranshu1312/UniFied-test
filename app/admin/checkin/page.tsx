@@ -20,6 +20,9 @@ export default function AdminCheckInPage() {
   const handleCheckIn = async (id: string) => {
     if (!id) return;
 
+    console.log("✅ Scanning ticket id:", id);
+
+    // Fetch ticket
     const { data: ticket, error: getError } = await supabase
       .from("tickets")
       .select("*")
@@ -27,61 +30,69 @@ export default function AdminCheckInPage() {
       .maybeSingle();
 
     if (getError || !ticket) {
+      console.error("❌ Ticket not found:", getError);
       toast({
-        title: "Invalid Ticket",
-        description: "Ticket not found.",
+        title: "❌ Invalid Ticket",
+        description: "Ticket not found in system.",
         variant: "destructive",
       });
       return;
     }
 
+    // Already checked in?
     if (ticket.checked_in) {
       toast({
-        title: "Already Checked-In",
-        description: `Already scanned at ${new Date(
-          ticket.checked_in_at
-        ).toLocaleString()}`,
+        title: "⚠️ Already Checked-In",
+        description: `Scanned earlier at ${new Date(ticket.checked_in_at).toLocaleString()}`,
       });
       return;
     }
 
+    // ✅ Update ticket
     const { error } = await supabase
       .from("tickets")
       .update({
         checked_in: true,
-        checked_in_at: new Date(),
+        checked_in_at: new Date().toISOString(),
       })
-      .eq("id", id);
+      .eq("id", id)
+      .eq("event_id", ticket.event_id)
+      .eq("user_id", ticket.user_id);
 
-    if (!error) {
-      toast({
-        title: "✅ Check-In Successful",
-        description: `Ticket Verified & Marked Checked-In.`,
-      });
-      const audio = new Audio("/success.mp3");
-      audio.play().catch(() => {});
-    } else {
+    if (error) {
+      console.error("❌ Check-in update error:", error);
       toast({
         title: "Error",
         description: error.message,
         variant: "destructive",
       });
+      return;
     }
+
+    // Audio success
+    try {
+      new Audio("/success.mp3").play();
+    } catch (e) {}
+
+    toast({
+      title: "✅ Check-In Successful",
+      description: `Ticket ${id} marked as checked-in.`,
+    });
   };
 
-  // ✅ Parse QR format: ticket=xxx|event=yyy|user=zzz
-  const handleQRScan = (result: string) => {
-    if (!result) return;
+  // ✅ Handle QR Scan
+  const handleQRScan = (text: string) => {
+    if (!text) return;
 
-    console.log("QR raw:", result);
+    console.log("📩 Raw QR text:", text);
 
-    const parts = result.split("|");
-    const ticketPart = parts.find((p) => p.startsWith("ticket="));
-    const ticketId = ticketPart?.split("=")[1];
+    // Your QR format:  ticket=XXX|event=YYY|user=ZZZ
+    const match = text.match(/ticket=([^|]+)/);
+    const ticketId = match?.[1];
 
     if (!ticketId) {
       toast({
-        title: "Invalid QR",
+        title: "⚠️ Invalid QR",
         description: "QR code format not recognized.",
         variant: "destructive",
       });
@@ -95,21 +106,20 @@ export default function AdminCheckInPage() {
     <div className="container mx-auto px-4 py-8 space-y-6">
       <h1 className="text-3xl font-bold">Check-In Attendees</h1>
 
-      {/* QR Scanner */}
+      {/* ✅ QR Scanner */}
       <Card>
         <CardHeader>
           <CardTitle>Scan QR Code</CardTitle>
         </CardHeader>
-
         <CardContent>
           <QRCodeScanner onScan={handleQRScan} />
         </CardContent>
       </Card>
 
-      {/* Manual Entry */}
+      {/* ✅ Manual Entry */}
       <Card>
         <CardHeader>
-          <CardTitle>Manual Check-In</CardTitle>
+          <CardTitle>Manual Ticket Check-In</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           <Input
