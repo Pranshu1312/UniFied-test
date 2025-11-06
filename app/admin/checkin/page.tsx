@@ -38,7 +38,7 @@ export default function AdminCheckInPage() {
     if (ticket.checked_in) {
       toast({
         title: "Already Checked-In",
-        description: `This ticket was scanned at ${new Date(
+        description: `Already scanned at ${new Date(
           ticket.checked_in_at
         ).toLocaleString()}`,
       });
@@ -47,14 +47,19 @@ export default function AdminCheckInPage() {
 
     const { error } = await supabase
       .from("tickets")
-      .update({ checked_in: true, checked_in_at: new Date() })
+      .update({
+        checked_in: true,
+        checked_in_at: new Date(),
+      })
       .eq("id", id);
 
     if (!error) {
       toast({
         title: "✅ Check-In Successful",
-        description: `Ticket ${id} has been checked-in.`,
+        description: `Ticket Verified & Marked Checked-In.`,
       });
+      const audio = new Audio("/success.mp3");
+      audio.play().catch(() => {});
     } else {
       toast({
         title: "Error",
@@ -62,6 +67,28 @@ export default function AdminCheckInPage() {
         variant: "destructive",
       });
     }
+  };
+
+  // ✅ Parse QR format: ticket=xxx|event=yyy|user=zzz
+  const handleQRScan = (result: string) => {
+    if (!result) return;
+
+    console.log("QR raw:", result);
+
+    const parts = result.split("|");
+    const ticketPart = parts.find((p) => p.startsWith("ticket="));
+    const ticketId = ticketPart?.split("=")[1];
+
+    if (!ticketId) {
+      toast({
+        title: "Invalid QR",
+        description: "QR code format not recognized.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    handleCheckIn(ticketId);
   };
 
   return (
@@ -73,28 +100,16 @@ export default function AdminCheckInPage() {
         <CardHeader>
           <CardTitle>Scan QR Code</CardTitle>
         </CardHeader>
+
         <CardContent>
-          <QRCodeScanner
-            onScan={(result: string) => {
-              const match = result.match(/TicketID:(.*?)\|/);
-              if (match) {
-                handleCheckIn(match[1]);
-              } else {
-                toast({
-                  title: "Invalid QR",
-                  description: "QR code format not recognized.",
-                  variant: "destructive",
-                });
-              }
-            }}
-          />
+          <QRCodeScanner onScan={handleQRScan} />
         </CardContent>
       </Card>
 
       {/* Manual Entry */}
       <Card>
         <CardHeader>
-          <CardTitle>Manual Ticket Check-In</CardTitle>
+          <CardTitle>Manual Check-In</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           <Input
