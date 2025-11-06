@@ -78,11 +78,12 @@ export default function EventsPage() {
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {events.map((event) => (
             <Card key={event.id} className="overflow-hidden">
-              <img
-                src={event.image || "/placeholder.svg"}
-                alt={event.title}
-                className="h-48 w-full object-cover"
-              />
+  <img
+  src={event.banner_url || "/placeholder.svg"}
+  alt={event.title}
+  className="h-48 w-full object-cover"
+  onError={(e) => (e.currentTarget.src = "/placeholder.svg")}
+/>
 
               <CardHeader>
                 <div className="flex items-center justify-between">

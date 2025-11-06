@@ -23,9 +23,8 @@ export default function CreateEventPage() {
     location: "",
     category: "",
     price: "",
+    banner_url: "", // ✅ Direct URL input
   });
-
-  const [banner, setBanner] = useState<File | null>(null);
 
   if (role !== "admin") {
     return <p className="p-6 text-red-600 font-semibold">Access Denied</p>;
@@ -35,42 +34,13 @@ export default function CreateEventPage() {
     setEventData({ ...eventData, [e.target.name]: e.target.value });
   };
 
-  const uploadBanner = async () => {
-    if (!banner) return null;
-
-    const fileName = `event-${Date.now()}-${banner.name}`;
-
-    // Upload file to Supabase storage
-    const { data, error } = await supabase.storage
-      .from("event-banners")
-      .upload(fileName, banner, {
-        cacheControl: "3600",
-        upsert: false,
-      });
-
-    if (error) {
-      toast({ title: "Image Upload Failed", description: error.message });
-      return null;
-    }
-
-    // Get public URL
-    const { data: publicURL } = supabase.storage
-      .from("event-banners")
-      .getPublicUrl(fileName);
-
-    return publicURL.publicUrl;
-  };
-
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     setLoading(true);
 
-    const banner_url = await uploadBanner();
-
     const { error } = await supabase.from("events").insert({
       ...eventData,
       price: Number(eventData.price),
-      banner_url: banner_url ?? "",
       created_by: user?.id,
     });
 
@@ -136,10 +106,29 @@ export default function CreateEventPage() {
           <Input type="number" name="price" onChange={handleChange} />
         </div>
 
+        {/* ✅ URL Input */}
         <div>
-          <Label>Event Banner</Label>
-          <Input type="file" accept="image/*" onChange={(e) => setBanner(e.target.files?.[0] || null)} />
+          <Label>Event Banner Image URL</Label>
+          <Input
+            name="banner_url"
+            placeholder="https://example.com/image.jpg"
+            onChange={handleChange}
+            required
+          />
         </div>
+
+        {/* ✅ Preview */}
+        {eventData.banner_url && (
+          <div className="mt-2">
+            <p className="text-sm">Preview:</p>
+            <img
+              src={eventData.banner_url}
+              className="mt-2 h-48 w-full object-cover rounded"
+              alt="Preview"
+              onError={(e) => (e.currentTarget.src = "/placeholder.svg")}
+            />
+          </div>
+        )}
 
         <Button disabled={loading} type="submit" className="w-full bg-purple-600 hover:bg-purple-700">
           {loading ? "Creating..." : "Create Event"}
