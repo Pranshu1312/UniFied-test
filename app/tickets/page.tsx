@@ -55,8 +55,9 @@ export default function TicketsPage() {
     fetchTickets();
   }, [user]);
 
-  const generateQR = async (ticket: any) => {
+  const openQR = async (ticket: any) => {
     const qrText = `ticket=${ticket.id}|event=${ticket.event_id}|user=${ticket.user_id}`;
+
     const url = await QRCode.toDataURL(qrText);
     setQrCode(url);
     setSelectedTicket(ticket);
@@ -140,14 +141,14 @@ export default function TicketsPage() {
                     <Button
                       variant="outline"
                       className="flex-1"
-                      onClick={() => generateQR(ticket)}
+                      onClick={() => openQR(ticket)}
                     >
                       <QrCode className="mr-2 h-4 w-4" /> QR
                     </Button>
                     <Button
                       variant="outline"
                       className="flex-1"
-                      onClick={() => generateQR(ticket)}
+                      onClick={() => openQR(ticket)}
                     >
                       <Download className="mr-2 h-4 w-4" /> Download
                     </Button>

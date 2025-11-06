@@ -22,6 +22,7 @@ export default function AdminCheckInPage() {
 
     console.log("🎯 Checking ticket:", id);
 
+    // ✅ Fetch ticket
     const { data: ticket, error: fetchError } = await supabase
       .from("tickets")
       .select("*")
@@ -38,6 +39,7 @@ export default function AdminCheckInPage() {
       return;
     }
 
+    // ✅ Already checked-in
     if (ticket.checked_in) {
       toast({
         title: "⚠️ Already Checked-In",
@@ -46,6 +48,7 @@ export default function AdminCheckInPage() {
       return;
     }
 
+    // ✅ Update ticket check-in
     const { error: updateError } = await supabase
       .from("tickets")
       .update({
@@ -64,9 +67,8 @@ export default function AdminCheckInPage() {
       return;
     }
 
-    try {
-      new Audio("/success.mp3").play(); // ✅ Play success sound
-    } catch {}
+    // ✅ Success beep
+    try { new Audio("/success.mp3").play(); } catch {}
 
     toast({
       title: "✅ Check-In Successful",
@@ -78,7 +80,7 @@ export default function AdminCheckInPage() {
     if (!raw) return;
     console.log("📥 QR Raw:", raw);
 
-    // ✅ Format: ticket=XXX|event=YYY|user=ZZZ
+    // ✅ Match ticket=UUID format
     const match = raw.match(/ticket=([^|]+)/);
     const id = match?.[1];
 
